@@ -24,6 +24,8 @@ class SocSenseData:
     soc_min: list[float]
     soc_max: list[float]
     home_usage_w: list[float]
+    home_usage_min: list[float]
+    home_usage_max: list[float]
     solar_w: list[float]
     matched_day: str | None
     scale_factor: float
