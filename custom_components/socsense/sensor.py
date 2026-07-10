@@ -8,7 +8,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
-from .coordinator import SocSenseCoordinator, SocSenseData
+from .coordinator import SocSenseCoordinator
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
@@ -66,12 +66,12 @@ class HomeUsageForecastMinSensor(_BaseForecastSensor):
     _attr_name = "Usage Forecast Min"
     @property
     def native_value(self): 
-        # Bereken min van het usage scenario
-        return round(min(self.coordinator.data.home_usage_min), 1)
+        # Controleer of home_usage_min bestaat in de data, anders fallback 0
+        return round(min(getattr(self.coordinator.data, 'home_usage_min', [0])), 1)
 
 class HomeUsageForecastMaxSensor(_BaseForecastSensor):
     _attr_name = "Usage Forecast Max"
     @property
     def native_value(self): 
-        # Bereken max van het usage scenario
-        return round(max(self.coordinator.data.home_usage_max), 1)
+        # Controleer of home_usage_max bestaat in de data, anders fallback 0
+        return round(max(getattr(self.coordinator.data, 'home_usage_max', [0])), 1)
