@@ -68,17 +68,20 @@ class SocSenseCoordinator(DataUpdateCoordinator[SocSenseData]):
     def _get_solcast_buckets(self, entity_id: str) -> list[float]:
         """Extraheert Solcast forecast en resampled naar 96 buckets van 15min."""
         state = self.hass.states.get(entity_id)
-        if not state or "forecast" not in state.attributes:
+        
+        # Voeg een check toe voor de 'forecast' key in attributes
+        if not state or not hasattr(state, 'attributes') or "forecast" not in state.attributes:
+            _LOGGER.warning("Solcast sensor %s is niet beschikbaar of heeft geen forecast", entity_id)
             return [0.0] * 96
         
         raw_forecast = state.attributes.get("forecast", [])
         buckets = []
         for entry in raw_forecast:
-            # Verdeel uurtarief over 4 kwartieren (15 min per bucket)
+            # Veiligheid: gebruik .get() met fallback 0
             val_per_15min = float(entry.get("pv_estimate", 0)) / 4
             buckets.extend([val_per_15min] * 4)
             
-        return buckets[:96] # Garandeer 24u data
+        return buckets[:96] # Garandeer exact 96 waarden
 
     def _resolve_power(self, sensor_entity: str | None, fallback: float) -> float:
         if sensor_entity and (state := self.hass.states.get(sensor_entity)):
